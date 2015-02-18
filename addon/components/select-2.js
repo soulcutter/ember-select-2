@@ -32,6 +32,7 @@ var Select2Component = Ember.Component.extend({
   // Bindings that may be overwritten in the template
   inputSize: "input-md",
   cssClass: null,
+  optionIdPath: "id",
   optionValuePath: null,
   optionLabelPath: 'text',
   optionHeadlinePath: 'text',
@@ -45,6 +46,8 @@ var Select2Component = Ember.Component.extend({
   typeaheadNoMatchesText: 'No matches found',
   typeaheadErrorText: 'Loading failed',
   searchEnabled: true,
+  minimumInputLength: null,
+  maximumInputLength: null,
 
   // internal state
   _hasSelectedMissingItems: false,
@@ -57,6 +60,7 @@ var Select2Component = Ember.Component.extend({
   didInsertElement: function() {
     var self = this,
         options = {},
+        optionIdPath = this.get('optionIdPath'),
         optionLabelPath = this.get('optionLabelPath'),
         optionHeadlinePath = this.get('optionHeadlinePath'),
         optionDescriptionPath = this.get('optionDescriptionPath'),
@@ -71,10 +75,13 @@ var Select2Component = Ember.Component.extend({
     options.multiple = this.get('multiple');
     options.allowClear = this.get('allowClear');
     options.minimumResultsForSearch = this.get('searchEnabled') ? 0 : -1 ;
-    
+
+    options.minimumInputLength = this.get('minimumInputLength');
+    options.maximumInputLength = this.get('maximumInputLength');
+
     // override select2's default id fetching behavior
     options.id = (function(e) {
-      return (e === undefined) ? null : get(e, 'id');
+      return (e === undefined) ? null : get(e, optionIdPath);
     });
 
     // allowClear is only allowed with placeholder
@@ -98,7 +105,7 @@ var Select2Component = Ember.Component.extend({
       }
 
       var output,
-          id = get(item, "id"),
+          id = get(item, optionIdPath),
           text = get(item, optionLabelPath),
           headline = get(item, optionHeadlinePath),
           description = get(item, optionDescriptionPath);
@@ -425,6 +432,7 @@ var Select2Component = Ember.Component.extend({
     }
 
     this.set("value", value);
+    this.sendAction('didSelect');
   },
 
   /**
